@@ -30,4 +30,11 @@ type sysfs_vl53l1, sysfs_type, fs_type;
 type omni_sysfs_drm, sysfs_type, fs_type;
 type omni_sysfs_motor, sysfs_type, fs_type;
 type omni_data_file, file_type, data_file_type,  core_data_file_type;
+type nv_data_file, file_type, data_file_type;
+type sysfs_fpc_irq, sysfs_type, fs_type;
+type sysfs_fpc_key, fs_type, sysfs_type;
+type sysfs_fpc_screen, sysfs_type, fs_type;
+type sysfs_fpc_proximity, sysfs_type, fs_type;
+type sysfs_wifi, sysfs_type, fs_type;
+
 

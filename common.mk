@@ -19,11 +19,8 @@ PRODUCT_COPY_FILES += \
 # Overlays
 DEVICE_PACKAGE_OVERLAYS += \
     $(LOCAL_PATH)/overlay \
-    $(LOCAL_PATH)/overlay-havoc
 
-PRODUCT_ENFORCE_RRO_TARGETS := *
-PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += \
-    $(LOCAL_PATH)/overlay-havoc/packages/apps/Snap
+
 
 # A/B
 AB_OTA_UPDATER := true
@@ -301,10 +298,6 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/gps/sap.conf:$(TARGET_COPY_OUT_VENDOR)/etc/sap.conf \
     $(LOCAL_PATH)/configs/gps/xtwifi.conf:$(TARGET_COPY_OUT_VENDOR)/etc/xtwifi.conf
 
-# Havoc Device Settings
-PRODUCT_PACKAGES += \
-    DeviceSettings
-
     
 # Health
 PRODUCT_PACKAGES += \
@@ -409,8 +402,8 @@ PRODUCT_PACKAGES += \
 
 # Prebuilts
 # PRODUCT_PACKAGES += \
-#    OnePlusCamera \
-#    OnePlusCameraService 
+    OnePlusCamera \
+    OnePlusCameraService 
 #    OnePlusGallery
 
 # QMI
@@ -491,11 +484,6 @@ PRODUCT_PACKAGES += \
 # Touch
 PRODUCT_PACKAGES += \
     vendor.lineage.touch@1.0-service.oneplus_msmnile
-
-# tri-state key
-PRODUCT_PACKAGES += \
-    KeyHandler \
-    tri-state-key_daemon
 
 # Vibrator
 PRODUCT_PACKAGES += \

@@ -724,10 +724,12 @@ public class KeyHandler implements DeviceKeyHandler {
         return null;
     }
 
+    @Override
     public boolean getCustomProxiIsNear(SensorEvent event) {
         return event.values[0] == 1;
     }
 
+    @Override
     public String getCustomProxiSensor() {
         return "com.oneplus.sensor.pocket";
     }
