@@ -86,23 +86,25 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final String GOODIX_CONTROL_PATH = "/sys/devices/soc/soc:goodix_fp/proximity_state";
 
     private static final int GESTURE_CIRCLE_SCANCODE = 250;
-    private static final int GESTURE_V_SCANCODE = 255;
+    private static final int GESTURE_V_SCANCODE = 252;
     private static final int GESTURE_II_SCANCODE = 251;
-    private static final int GESTURE_LEFT_V_SCANCODE = 253;
-    private static final int GESTURE_RIGHT_V_SCANCODE = 254;
-    private static final int GESTURE_A_SCANCODE = 252;
+    private static final int GESTURE_LEFT_V_SCANCODE = 254;
+    private static final int GESTURE_RIGHT_V_SCANCODE = 253;
+    private static final int GESTURE_A_SCANCODE = 255;
+
     private static final int GESTURE_RIGHT_SWIPE_SCANCODE = 63;
-    private static final int GESTURE_LEFT_SWIPE_SCANCODE = 64;
-    private static final int GESTURE_DOWN_SWIPE_SCANCODE = 65;
-    private static final int GESTURE_UP_SWIPE_SCANCODE = 66;
+    private static final int GESTURE_LEFT_SWIPE_SCANCODE = 65;
+    private static final int GESTURE_DOWN_SWIPE_SCANCODE = 66;
+    private static final int GESTURE_UP_SWIPE_SCANCODE = 64;
+
 
     private static final int KEY_DOUBLE_TAP = 143;
     private static final int KEY_HOME = 102;
     private static final int KEY_BACK = 158;
     private static final int KEY_RECENTS = 580;
-    private static final int KEY_SLIDER_TOP = 601;
+    private static final int KEY_SLIDER_TOP = 603;
     private static final int KEY_SLIDER_CENTER = 602;
-    private static final int KEY_SLIDER_BOTTOM = 603;
+    private static final int KEY_SLIDER_BOTTOM = 601;
 
     private static final int MIN_PULSE_INTERVAL_MS = 2500;
     private static final String DOZE_INTENT = "com.android.systemui.doze.pulse";
@@ -113,7 +115,7 @@ public class KeyHandler implements DeviceKeyHandler {
     private static final int FP_GESTURE_SWIPE_LEFT = 105;
     private static final int FP_GESTURE_SWIPE_RIGHT = 106;
     private static final int FP_GESTURE_LONG_PRESS = 305;
-    private static final boolean sIsOnePlus5t = android.os.Build.DEVICE.equals("OnePlus5T");
+    private static final boolean sIsguacamoleb = android.os.Build.DEVICE.equals("guacamoleb");
 
     public static final String PACKAGE_SYSTEMUI = "com.android.systemui";
 
@@ -209,7 +211,7 @@ public class KeyHandler implements DeviceKeyHandler {
             mProxyIsNear = event.values[0] == 1;
             if (DEBUG_SENSOR) Log.i(TAG, "mProxyIsNear = " + mProxyIsNear + " mProxyWasNear = " + mProxyWasNear);
             if (mUseProxiCheck) {
-                if (!sIsOnePlus5t) {
+                if (!sIsguacamoleb) {
                     if (Utils.fileWritable(FPC_CONTROL_PATH)) {
                         Utils.writeValue(FPC_CONTROL_PATH, mProxyIsNear ? "1" : "0");
                     }
@@ -342,7 +344,7 @@ public class KeyHandler implements DeviceKeyHandler {
             if (DEBUG) Log.i(TAG, "scanCode=" + event.getScanCode());
             switch(event.getScanCode()) {
                 case KEY_SLIDER_TOP:
-                    if (DEBUG) Log.i(TAG, "KEY_SLIDER_TOP");
+                    if (DEBUG) Log.i(TAG, "KEY_SLIDER_BOTTOM");
                     doHandleSliderAction(0, 170);
                     return true;
                 case KEY_SLIDER_CENTER:
@@ -350,7 +352,7 @@ public class KeyHandler implements DeviceKeyHandler {
                     doHandleSliderAction(1, 260);
                     return true;
                 case KEY_SLIDER_BOTTOM:
-                    if (DEBUG) Log.i(TAG, "KEY_SLIDER_BOTTOM");
+                    if (DEBUG) Log.i(TAG, "KEY_SLIDER_TOP");
                     doHandleSliderAction(2, 350);
                     return true;
             }
@@ -373,7 +375,7 @@ public class KeyHandler implements DeviceKeyHandler {
 
     @Override
     public boolean canHandleKeyEvent(KeyEvent event) {
-        if (sIsOnePlus5t) {
+        if (sIsguacamoleb) {
             return ArrayUtils.contains(sSupportedGestures5t, event.getScanCode());
         } else {
             return ArrayUtils.contains(sSupportedGestures, event.getScanCode());
@@ -479,7 +481,7 @@ public class KeyHandler implements DeviceKeyHandler {
     }
 
     private void enableGoodix() {
-        if (sIsOnePlus5t) {
+        if (sIsguacamoleb) {
             if (Utils.fileWritable(GOODIX_CONTROL_PATH)) {
                 Utils.writeValue(GOODIX_CONTROL_PATH, "0");
             }
@@ -742,7 +744,7 @@ public class KeyHandler implements DeviceKeyHandler {
         public void run() {
             if (toast != null) toast.cancel();
             toast = Toast.makeText(mSysUiContext, message, duration);
-            toast.setGravity(Gravity.TOP|Gravity.LEFT, 0, yOffset);
+            toast.setGravity(Gravity.TOP|Gravity.RIGHT, 0, yOffset);
             toast.show();
             }
         });
