@@ -8,6 +8,11 @@ type persist_engineer_file, file_type;
 
 # proc
 type proc_sensor, fs_type, proc_type;
+
+type debugfs_power_stats, fs_type, debugfs_type;
+type lineage_data_file, file_type, data_file_type,  core_data_file_type;
+type proc_alarm_boot, fs_type, proc_type;
+
 type proc_touchpanel, fs_type, proc_type;
 type proc_ultrasound, fs_type, proc_type;
 

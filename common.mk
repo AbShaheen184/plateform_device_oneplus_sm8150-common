@@ -84,7 +84,10 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.midi.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.midi.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.sip.voip.xml \
     frameworks/native/data/etc/handheld_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/handheld_core_hardware.xml \
-    $(LOCAL_PATH)/configs/vendor.lineage.biometrics.fingerprint.inscreen.xml:system/etc/permissions/vendor.lineage.biometrics.fingerprint.inscreen.xml
+    $(LOCAL_PATH)/configs/vendor.lineage.biometrics.fingerprint.inscreen.xml:system/etc/permissions/vendor.lineage.biometrics.fingerprint.inscreen.xml \
+	$(LOCAL_PATH)/configs/superior-hiddenapi-package-whitelist.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/superior-hiddenapi-package-whitelist.xml \
+	$(LOCAL_PATH)/configs/privapp-permissions-superior-product.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-superior.xml \
+
 
 
 # Camera libs
@@ -182,8 +185,19 @@ PRODUCT_PACKAGES += \
     bootctrl.msmnile \
     bootctrl.msmnile.recovery
 
+
 PRODUCT_PACKAGES_DEBUG += \
     bootctl
+
+# Camera
+PRODUCT_PACKAGES += \
+    android.frameworks.displayservice@1.0_32 \
+    android.hardware.camera.provider@2.4-impl \
+    android.hardware.camera.provider@2.4-service \
+    camera.device@1.0-impl \
+    camera.device@3.2-impl \
+    libshim_camera \
+    vendor.oneplus.camera.CameraHIDL@1.0 
 
 # Bluetooth
 PRODUCT_PACKAGES += \
@@ -226,6 +240,7 @@ PRODUCT_PACKAGES += \
     init.recovery.qcom.rc \
     init.target.rc \
     init.target.omni.rc \
+	init.lineage.rc \
     kmemleak.sh \
     ueventd.rc \
     vendor.oem_ftm.rc \
@@ -242,6 +257,7 @@ DERP_BUILDTYPE := Official
 BUILD_DATE := $(shell date +"%Y%m%d-%H%M%S")
 IS_PHONE := true
 CURRENT_BUILD_TYPE := nogapps
+DERP_BUILD_ZIP_TYPE := VANILLA
 
 
 # Display
