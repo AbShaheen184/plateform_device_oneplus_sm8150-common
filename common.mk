@@ -225,6 +225,7 @@ PRODUCT_PACKAGES += \
     init.qti.ims.sh \
     init.recovery.qcom.rc \
     init.target.rc \
+    init.target.omni.rc \
     kmemleak.sh \
     ueventd.rc \
     vendor.oem_ftm.rc \
@@ -401,7 +402,7 @@ PRODUCT_PACKAGES += \
     android.hardware.power@1.2-service-qti
 
 # Prebuilts
-# PRODUCT_PACKAGES += \
+ PRODUCT_PACKAGES += \
     OnePlusCamera \
     OnePlusCameraService 
 #    OnePlusGallery
