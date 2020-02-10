@@ -21,6 +21,8 @@
 #include <android-base/properties.h>
 #include <hidl/HidlTransportSupport.h>
 #include <fstream>
+#include <vector>
+#include <stdlib.h>
 
 #define FINGERPRINT_ACQUIRED_VENDOR 6
 #define FINGERPRINT_ERROR_VENDOR 8
@@ -34,16 +36,9 @@
 #define OP_DISPLAY_NOTIFY_PRESS 9
 #define OP_DISPLAY_SET_DIM 10
 
+// This is not a typo by me. It's by OnePlus.
 #define HBM_ENABLE_PATH "/sys/class/drm/card0-DSI-1/op_friginer_print_hbm"
-#define HBM_DIM_PATH "/sys/class/drm/card0-DSI-1/hbm_brightness"
 #define DIM_AMOUNT_PATH "/sys/class/drm/card0-DSI-1/dim_alpha"
-#define DC_DIM_PATH "/sys/class/drm/card0-DSI-1/dimlayer_bl_en"
-
-#define NATIVE_DISPLAY_P3 "/sys/class/drm/card0-DSI-1/native_display_p3_mode"
-#define NATIVE_DISPLAY_SRGB "/sys/class/drm/card0-DSI-1/native_display_customer_srgb_mode"
-#define NATIVE_DISPLAY_NIGHT "/sys/class/drm/card0-DSI-1/night_mode"
-
-#define NATIVE_DISPLAY_WIDE "/sys/class/drm/card0-DSI-1/native_display_wide_color_mode"
 
 namespace vendor {
 namespace lineage {
@@ -53,9 +48,31 @@ namespace inscreen {
 namespace V1_0 {
 namespace implementation {
 
-int wide,p3,srgb,night;
-bool dcDimState;
-int device[3] = {0, 0, 0};
+bool isOnePlus7;
+
+const std::vector<std::vector<int>> BRIGHTNESS_ALPHA_ARRAY = {
+    std::vector<int>{0, 255},
+    std::vector<int>{1, 241},
+    std::vector<int>{2, 236},
+    std::vector<int>{4, 235},
+    std::vector<int>{5, 234},
+    std::vector<int>{6, 232},
+    std::vector<int>{10, 228},
+    std::vector<int>{20, 220},
+    std::vector<int>{30, 212},
+    std::vector<int>{45, 204},
+    std::vector<int>{70, 190},
+    std::vector<int>{100, 179},
+    std::vector<int>{150, 166},
+    std::vector<int>{227, 144},
+    std::vector<int>{300, 131},
+    std::vector<int>{400, 112},
+    std::vector<int>{500, 96},
+    std::vector<int>{600, 83},
+    std::vector<int>{800, 60},
+    std::vector<int>{1023, 34},
+    std::vector<int>{2000, 131}
+};
 
 using android::base::GetProperty;
 
@@ -81,10 +98,7 @@ FingerprintInscreen::FingerprintInscreen() {
     this->mVendorFpService = IVendorFingerprintExtensions::getService();
     this->mVendorDisplayService = IOneplusDisplay::getService();
     std::string device = android::base::GetProperty("ro.product.device", "");
-    device[0] = device == "OnePlus7" ? 1 : 0;
-    device[1] = device == "OnePlus7pro" ? 1 : 0;
-    device[2] = device == "OnePlus7T" ? 1 : 0;
-    device[3] = device == "OnePlus7TPro" ? 1 : 0;
+    isOnePlus7 = device == "OnePlus7";
 }
 
 Return<void> FingerprintInscreen::onStartEnroll() {
@@ -101,52 +115,45 @@ Return<void> FingerprintInscreen::onFinishEnroll() {
 }
 
 Return<void> FingerprintInscreen::onPress() {
-    this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 5);
+    if (!isOnePlus7) {
+        this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 2);
+    }
+    this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 1);
+    if (!isOnePlus7) {
+        set(HBM_ENABLE_PATH, 1);
+    }
     this->mVendorDisplayService->setMode(OP_DISPLAY_NOTIFY_PRESS, 1);
-    set(HBM_ENABLE_PATH, 1);
 
     return Void();
 }
 
 Return<void> FingerprintInscreen::onRelease() {
-    set(HBM_ENABLE_PATH, 0);
+    if (!isOnePlus7) {
+        this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 0);
+    }
+    this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 0);
+    if (!isOnePlus7) {
+        set(HBM_ENABLE_PATH, 0);
+    }
     this->mVendorDisplayService->setMode(OP_DISPLAY_NOTIFY_PRESS, 0);
-    set(HBM_DIM_PATH, 0);
 
     return Void();
 }
 
 Return<void> FingerprintInscreen::onShowFODView() {
-    this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 2);
-    this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 1);
-    wide = get(NATIVE_DISPLAY_WIDE, 0);
-    p3 = get(NATIVE_DISPLAY_P3, 0);
-    srgb = get(NATIVE_DISPLAY_SRGB, 0);
-    night = get(NATIVE_DISPLAY_NIGHT, 0);
-    dcDimState = get(DC_DIM_PATH, 0);
-
-    set(DC_DIM_PATH, 0);
-    set(NATIVE_DISPLAY_P3, 0);
-    set(NATIVE_DISPLAY_SRGB, 0);
-    set(NATIVE_DISPLAY_NIGHT, 0);
-    set(NATIVE_DISPLAY_WIDE, 1);
-
-    set(HBM_DIM_PATH, 255 - getDimAmount(255));
-
     return Void();
 }
 
 Return<void> FingerprintInscreen::onHideFODView() {
-    set(HBM_ENABLE_PATH, 0);
-    set(DC_DIM_PATH, dcDimState);
-    set(NATIVE_DISPLAY_WIDE, 0);
-
-    set(NATIVE_DISPLAY_WIDE, wide);
-    set(NATIVE_DISPLAY_P3, p3);
-    set(NATIVE_DISPLAY_SRGB, srgb);
-    set(NATIVE_DISPLAY_NIGHT, night);
-
+    if (!isOnePlus7) {
+        this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 0);
+    }
     this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 0);
+    if (!isOnePlus7) {
+        set(HBM_ENABLE_PATH, 0);
+    }
+    this->mVendorDisplayService->setMode(OP_DISPLAY_NOTIFY_PRESS, 0);
+
     return Void();
 }
 
@@ -188,18 +195,56 @@ Return<void> FingerprintInscreen::setLongPressEnabled(bool enabled) {
     return Void();
 }
 
-Return<int32_t> FingerprintInscreen::getDimAmount(int32_t) {
+int interpolate(int x, int xa, int xb, int ya, int yb) {
+    int sub = 0;
+    int bf = (((yb - ya) * 2) * (x - xa)) / (xb - xa);
+    int factor = bf / 2;
+    int plus = bf % 2;
+    if (!(xa - xb == 0 || yb - ya == 0)) {
+        sub = (((2 * (x - xa)) * (x - xb)) / (yb - ya)) / (xa - xb);
+    }
+    return ya + factor + plus + sub;
+}
+
+int getDimAlpha(int brightness) {
+    int level = BRIGHTNESS_ALPHA_ARRAY.size();
+    int i = 0;
+    while (i < level && BRIGHTNESS_ALPHA_ARRAY[i][0] < brightness) {
+        i++;
+    }
+    if (i == 0) {
+        return BRIGHTNESS_ALPHA_ARRAY[0][1];
+    }
+    if (i == level) {
+        return BRIGHTNESS_ALPHA_ARRAY[level - 1][1];
+    }
+    return interpolate(brightness,
+            BRIGHTNESS_ALPHA_ARRAY[i - 1][0],
+            BRIGHTNESS_ALPHA_ARRAY[i][0],
+            BRIGHTNESS_ALPHA_ARRAY[i - 1][1],
+            BRIGHTNESS_ALPHA_ARRAY[i][1]);
+}
+
+Return<int32_t> FingerprintInscreen::getDimAmount(int32_t brightness) {
     int dimAmount = get(DIM_AMOUNT_PATH, 0);
+    if (isOnePlus7) {
+        int curBrightness = brightness * 4.011765;
+        int val = getDimAlpha(curBrightness);
+        float alpha = ((float) val) / 255.0f;
+        float ratio = ((float) stof(android::base::GetProperty("persist.vendor.sys.fod.icon.dim", "90"))) / 100.0f;
+        dimAmount = (alpha * ratio) * 255.0f;
+    }
     LOG(INFO) << "dimAmount = " << dimAmount;
 
     return dimAmount;
 }
 
 Return<bool> FingerprintInscreen::shouldBoostBrightness() {
-    if (device[0])
-        return true;
-    else
+    if (!isOnePlus7) {
         return false;
+    } else {
+        return true;
+    }
 }
 
 Return<void> FingerprintInscreen::setCallback(const sp<IFingerprintInscreenCallback>& callback) {
